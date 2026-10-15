@@ -7,7 +7,20 @@ import errorHandler from './src/middleware/error-handler.js';import mainRouter f
 
 const app = express();
 
-app.use(cors()); 
+// app.use(cors()); => i replaced this line by the code below for production
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    process.env.FRONTEND_URL,
+].filter(Boolean);
+
+app.use(cors({
+    origin: (origin, cb) => {
+        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+        cb(new Error(`CORS blocked: ${origin}`));
+    },
+    credentials: true,
+}));
 // req body wst yetelake data extract medereg slalebet esu demo yemiseraw be "express middleware wust bemalef nw" soexpress lay yale builtin middleware call enaregalen wc is json
 app.use(express.json()); 
 app.use('/api', mainRouter);
@@ -20,8 +33,8 @@ async function startServer() {
     try{
         const connection = await db.getConnection();
         connection.release();
-
-        app.listen(3877, err => {
+        const PORT = process.env.PORT || 3877;
+        app.listen(PORT, err => {
             if(err) {
                 throw err;
             }

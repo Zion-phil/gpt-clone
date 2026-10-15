@@ -12,7 +12,10 @@ import {
 import axios from 'axios';
 import styles from './Sidebar.module.css';
 
-const API_BASE_URL = 'http://localhost:3877/api';
+// const API_BASE_URL = 'http://localhost:3877/api'; => changed this line to the code below for production case
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : 'http://localhost:3877/api';
 
 export default function Sidebar({
   activeSessionId,

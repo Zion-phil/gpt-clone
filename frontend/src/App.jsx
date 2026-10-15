@@ -11,6 +11,8 @@ const API_BASE_URL = 'http://localhost:3877/api';
 function App() {
   const [conversations, setConversations] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);     // ← re-fetch sidebar when bumped
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -18,64 +20,70 @@ function App() {
   };
 
   useEffect(() => {
-    fetchConversations();
-  }, []);
-
-  useEffect(() => {
     scrollToBottom();
   }, [conversations, isLoading]);
 
-  const fetchConversations = async () => {
+  // ─── Load a session's messages when one is selected ───
+  const handleSelectSession = async (sessionId) => {
+    setIsLoading(true);
     try {
-      const response = await axios.get(`${API_BASE_URL}/chat/conversations`);
-      if (response.data.success) {
-        // setConversations(response.data.data.conversations);
-        setConversations(response.data.data);
+      const res = await axios.get(`${API_BASE_URL}/chat/sessions/${sessionId}`);
+      if (res.data.success) {
+        setActiveSessionId(sessionId);
+        setConversations(res.data.data.messages);
       }
     } catch (error) {
-      console.error('Error fetching conversations:', error);
+      console.error('Error loading session:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSendMessage = async question => {
-    // Optimistically add user message
-    const tempUserMessage = {
-      id: Date.now(),
-      role: 'user',
-      content: question,
-    };
-    setConversations(prev => [...prev, tempUserMessage]);
+  // ─── Start a fresh chat ───
+  const handleNewChat = () => {
+    setActiveSessionId(null);
+    setConversations([]);
+  };
+
+  // ─── Send a message ───
+  const handleSendMessage = async (question) => {
+    const tempUserMessage = { id: Date.now(), role: 'user', content: question };
+    setConversations((prev) => [...prev, tempUserMessage]);
     setIsLoading(true);
 
     try {
       const response = await axios.post(`${API_BASE_URL}/chat/conversations`, {
         Question: question,
-        // added Question for be case here
+        sessionId: activeSessionId,   // ← null on first message → backend creates a session
       });
+
       if (response.data.success) {
-        const { userConversation, assistantConversation } = response.data.data;
-        // Replace temp message with real ones
-        setConversations(prev => {
-          const filtered = prev.filter(msg => msg.id !== tempUserMessage.id);
+        const { sessionId, userConversation, assistantConversation } = response.data.data;
+
+        // First message of a brand-new chat → adopt the new session id
+        if (!activeSessionId) {
+          setActiveSessionId(sessionId);
+          setRefreshKey((k) => k + 1);   // tell the sidebar to refresh
+        }
+
+        setConversations((prev) => {
+          const filtered = prev.filter((msg) => msg.id !== tempUserMessage.id);
           return [...filtered, userConversation, assistantConversation];
         });
       }
     } catch (error) {
       console.error('Error posting conversation:', error);
 
-      // Extract error message from backend response or use a realistic fallback
       const errorMessage =
         error.response?.data?.message ||
         'There was an error generating a response.';
 
-      // Add error message to chat
       const errorConversation = {
         id: Date.now() + 1,
         role: 'assistant',
         content: errorMessage,
       };
-
-      setConversations(prev => [...prev, errorConversation]);
+      setConversations((prev) => [...prev, errorConversation]);
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +91,12 @@ function App() {
 
   return (
     <div className='app'>
-      <Sidebar />
+      <Sidebar
+        activeSessionId={activeSessionId}
+        onSelectSession={handleSelectSession}
+        onNewChat={handleNewChat}
+        refreshKey={refreshKey}
+      />
 
       <main className='chat'>
         <ChatHeader />

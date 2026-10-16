@@ -1,7 +1,7 @@
 import db from '../../../../db/db.config.js';
 import { GoogleGenAI } from '@google/genai';
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 // Lazy client so the API key is read after dotenv has run
 let geminiClient = null;

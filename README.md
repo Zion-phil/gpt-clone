@@ -2,7 +2,7 @@
 
 A full-stack ChatGPT clone built with **React + Vite**, **Node + Express**, **MySQL**, and the **Google Gemini API**. Supports multi-session chat history, markdown responses, and a ChatGPT-style sidebar.
 
-🔗 **Live Demo:** [Coming soon](#)
+🔗 **Live Demo:** [https://gpt-clone-tsion2.vercel.app](https://gpt-clone-tsion2.vercel.app)
 
 ---
 
@@ -208,3 +208,9 @@ This project uses three services:
 ## 📄 License
 
 Educational project — built as part of the Evangadi Bootcamp. Not affiliated with OpenAI or ChatGPT.
+
+## 🌐 Deployed
+
+- **Frontend:** https://gpt-clone-tsion2.vercel.app (Vercel)
+- **Backend:** https://gpt-clone-o5hf.onrender.com (Render)
+- **Database:** Aiven MySQL (free tier)

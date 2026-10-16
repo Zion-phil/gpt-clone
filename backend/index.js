@@ -34,12 +34,12 @@ async function startServer() {
         const connection = await db.getConnection();
         connection.release();
         const PORT = process.env.PORT || 3877;
-        app.listen(PORT, err => {
-            if(err) {
-                throw err;
-            }
-            console.log('server is running on port http://localhost:3877');
-        });
+    app.listen(PORT, err => {
+        if(err) {
+            throw err;
+        }
+        console.log(`server is running on port http://localhost:${PORT}`);
+    }); 
     }catch (error) {
         console.error('Error startin server:', error.message);
     }

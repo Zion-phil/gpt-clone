@@ -195,7 +195,7 @@ export async function createConversationService(Question, sessionId = null) {
         // insert user question
 
         const [result] = await db.execute(
-            'INSERT INTO conversations (session_id, content, role) VALUES (?, ?, "user")',
+            "INSERT INTO conversations (session_id, content, role) VALUES (?, ?, 'user')",
             [activeSessionId, Question],
         );
 
@@ -205,7 +205,7 @@ export async function createConversationService(Question, sessionId = null) {
         });
 
         const [assistantResult] = await db.execute(
-            'INSERT INTO conversations (session_id, role, content, token_count) VALUES (?, ?, ?, ?)',
+            "INSERT INTO conversations (session_id, role, content, token_count) VALUES (?, ?, ?, ?)",
             [activeSessionId, 'assistant', text, totalTokens],
         );
 
